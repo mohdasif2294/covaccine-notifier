@@ -25,7 +25,7 @@ func sendMail(id, pass, body string) error {
 }
 
 func sendSMS(vaccType, num string) error {
-	msg := fmt.Sprintf("ALERT: %s available on CoWIN App", vaccType)
+	msg := fmt.Sprintf("ALERT: %s available on CoWIN App at %s", vaccType,district)
 	awsclient.SendSMS(num, msg)
 	return nil
 }
