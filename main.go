@@ -7,12 +7,13 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/PrasadG193/covaccine-notifier/awsclient"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 )
 
 var (
-	pinCode, state, district, email, password, date, vaccine, fee string
+	pinCode, state, district, email, password, date, vaccine, fee, phone_num string
 
 	age, interval int
 
@@ -35,11 +36,13 @@ const (
 	searchIntervalEnv = "SEARCH_INTERVAL"
 	vaccineEnv        = "VACCINE"
 	feeEnv            = "FEE"
+	phoneNum          = "PHONE_NUM"
 
 	defaultSearchInterval = 60
 
 	covishield = "covishield"
 	covaxin    = "covaxin"
+	sputnik    = "sputnik"
 
 	free = "free"
 	paid = "paid"
@@ -53,8 +56,9 @@ func init() {
 	rootCmd.PersistentFlags().StringVarP(&email, "email", "e", os.Getenv(emailIDEnv), "Email address to send notifications")
 	rootCmd.PersistentFlags().StringVarP(&password, "password", "p", os.Getenv(emailPasswordEnv), "Email ID password for auth")
 	rootCmd.PersistentFlags().IntVarP(&interval, "interval", "i", getIntEnv(searchIntervalEnv), fmt.Sprintf("Interval to repeat the search. Default: (%v) second", defaultSearchInterval))
-	rootCmd.PersistentFlags().StringVarP(&vaccine, "vaccine", "v", os.Getenv(vaccineEnv), fmt.Sprintf("Vaccine preferences - covishield (or) covaxin. Default: No preference"))
+	rootCmd.PersistentFlags().StringVarP(&vaccine, "vaccine", "v", os.Getenv(vaccineEnv), fmt.Sprintf("Vaccine preferences - covishield (or) covaxin (or) sputnik. Default: No preference"))
 	rootCmd.PersistentFlags().StringVarP(&fee, "fee", "f", os.Getenv(feeEnv), fmt.Sprintf("Fee preferences - free (or) paid. Default: No preference"))
+	rootCmd.PersistentFlags().StringVarP(&phone_num, "phone", "m", os.Getenv(phoneNum), fmt.Sprintf("phoneNumber for SMS Alerts"))
 }
 
 // Execute executes the main command
@@ -80,16 +84,20 @@ func checkFlags() error {
 	if interval == 0 {
 		interval = defaultSearchInterval
 	}
-	if !(vaccine == "" || vaccine == covishield || vaccine == covaxin) {
-		return errors.New("Invalid vaccine, please use covaxin or covishield")
+	if !(vaccine == "" || vaccine == covishield || vaccine == covaxin || vaccine == sputnik) {
+		return errors.New("Invalid vaccine, please use covaxin or covishield or sputnik")
 	}
 	if !(fee == "" || fee == free || fee == paid) {
 		return errors.New("Invalid fee preference, please use free or paid")
+	}
+	if phone_num == "" {
+		return errors.New("Missing Phone Number for SMS")
 	}
 	return nil
 }
 
 func main() {
+	awsclient.Initialize()
 	Execute()
 }
 

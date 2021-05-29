@@ -1,7 +1,10 @@
 package main
 
 import (
+	"fmt"
 	"net/smtp"
+
+	"github.com/PrasadG193/covaccine-notifier/awsclient"
 )
 
 func sendMail(id, pass, body string) error {
@@ -18,5 +21,11 @@ func sendMail(id, pass, body string) error {
 	if err != nil {
 		return err
 	}
+	return nil
+}
+
+func sendSMS(vaccType, num string) error {
+	msg := fmt.Sprintf("ALERT: %s available on CoWIN App", vaccType)
+	awsclient.SendSMS(num, msg)
 	return nil
 }

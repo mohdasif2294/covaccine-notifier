@@ -189,6 +189,15 @@ func isPreferredAvailable(current, preference string) bool {
 	}
 }
 
+// isPreferredVaccineAvailable checks for availability of vaccine preferences
+func isPreferredVaccineAvailable(current, preference string) bool {
+	if preference == "" {
+		return true
+	} else {
+		return strings.Contains(strings.ToLower(current), preference)
+	}
+}
+
 func getAvailableSessions(response []byte, age int) error {
 	if response == nil {
 		log.Printf("Received unexpected response, rechecking after %v seconds", interval)
@@ -206,7 +215,7 @@ func getAvailableSessions(response []byte, age int) error {
 			continue
 		}
 		for _, s := range center.Sessions {
-			if s.MinAgeLimit <= age && s.AvailableCapacity != 0 && isPreferredAvailable(s.Vaccine, vaccine) {
+			if s.MinAgeLimit <= age && s.AvailableCapacity != 0 && isPreferredVaccineAvailable(s.Vaccine, vaccine) {
 				fmt.Fprintln(w, fmt.Sprintf("Center\t%s", center.Name))
 				fmt.Fprintln(w, fmt.Sprintf("State\t%s", center.StateName))
 				fmt.Fprintln(w, fmt.Sprintf("District\t%s", center.DistrictName))
@@ -240,5 +249,13 @@ func getAvailableSessions(response []byte, age int) error {
 		return nil
 	}
 	log.Print("Found available slots, sending email")
-	return sendMail(email, password, buf.String())
+	err = sendMail(email, password, buf.String())
+	if err != nil {
+		log.Printf("unable to send email. Err: %s", err)
+	}
+	err = sendSMS(vaccine, phone_num)
+	if err != nil {
+		log.Printf("unable to send SMS. Err: %s", err)
+	}
+	return err
 }
