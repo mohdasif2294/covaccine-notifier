@@ -79,7 +79,7 @@ type Appointments struct {
 }
 
 func timeNow() string {
-	return time.Now().Format("02-01-2006")
+	return time.Now().Local().Format("02-01-2006")
 }
 
 func queryServer(path string) ([]byte, error) {

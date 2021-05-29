@@ -139,8 +139,8 @@ func checkSlots() error {
 		return searchByPincode(pinCode)
 	}
 	err := searchByStateDistrict(age, state, district)
-        if err != nil {
-               log.Printf("Could Not find appointment. Err: %s", err.Error())
-         }
-        return err
+	if err != nil {
+		log.Printf("Could Not find appointment. Err: %s", err.Error())
+	}
+	return err
 }
